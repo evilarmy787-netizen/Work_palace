@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Contact Notes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      color: #222;
+    }
+
+    .app {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.5rem;
+      margin-bottom: 12px;
+    }
+
+    form {
+      background: #ffffff;
+      padding: 12px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+      color: #555;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 2px rgba(0,123,255,0.15);
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .row > div {
+      flex: 1;
+    }
+
+    button {
+      display: inline-block;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: #007bff;
+      color: white;
+      width: 100%;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 4px;
+      margin-bottom: 8px;
+    }
+
+    .list-header h2 {
+      font-size: 1.1rem;
+      margin: 0;
+    }
+
+    .btn-clear {
+      background: #e53e3e;
+      color: white;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .search-panel {
+      background: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      margin-bottom: 10px;
+    }
+
+    .search-panel-title {
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    .search-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .search-grid input {
+      flex: 1 1 calc(50% - 6px);
+      margin-bottom: 0;
+      font-size: 0.8rem;
+      padding: 6px 8px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin: 8px 0;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .tab-button {
+      flex: 1;
+      padding: 8px 0;
+      font-size: 0.9rem;
+      background: transparent;
+      border-radius: 0;
+      border: none;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab-button.active {
+      border-bottom-color: #007bff;
+      font-weight: 600;
+      color: #007bff;
+    }
+
+    .entries {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .entry {
+      background: white;
+      border-radius: 10px;
+      padding: 8px 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      font-size: 0.85rem;
+    }
+
+    .entry-main {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .entry-main strong {
+      font-size: 0.95rem;
+    }
+
+    .entry-meta {
+      color: #666;
+      font-size: 0.8rem;
+      margin-top: 2px;
+    }
+
+    .entry-meta span {
+      display: inline-block;
+      margin-right: 8px;
+    }
+
+    .entry-actions {
+      margin-top: 6px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 4px;
+    }
+
+    .btn-small {
+      padding: 4px 10px;
+      font-size: 0.7rem;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-delete {
+      background: #f56565;
+      color: white;
+    }
+
+    .btn-call {
+      background: #38a169;
+      color: white;
+    }
+
+    .btn-fav {
+      background: #fbbf24;
+      color: #222;
+    }
+
+    .empty {
+      text-align: center;
+      color: #777;
+      font-size: 0.9rem;
+      margin-top: 8px;
+    }
+
+    #favSection,
+    #historySection {
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>My Contact Notes</h1>
+
+    <!-- Form -->
+    <form id="entry-form">
+      <label for="phone">Phone Number *</label>
+      <input type="tel" id="phone" required placeholder="e.g. 9876543210" />
+
+      <label for="personName">Person Name (optional)</label>
+      <input type="text" id="personName" placeholder="e.g. John" />
+
+      <label for="location">Location Name *</label>
+      <input type="text" id="location" required placeholder="e.g. Cafe near park" />
+
+      <div class="row">
+        <div>
+          <label for="date">Date *</label>
+          <input type="date" id="date" required />
+        </div>
+        <div>
+          <label for="personNumber">Person Number (optional)</label>
+          <input type="number" id="personNumber" min="1" placeholder="e.g. 2" />
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary">Save</button>
+    </form>
+
+    <!-- Multi filter search -->
+    <div class="search-panel">
+      <div class="search-panel-title">Filters (optional)</div>
+      <div class="search-grid">
+        <input type="date" id="filterDate" />
+        <input type="text" id="filterPlace" placeholder="Place..." />
+        <input type="text" id="filterPerson" placeholder="Person name..." />
+        <input type="text" id="filterNumber" placeholder="Phone / person no..." />
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-button active" data-tab="history">History</button>
+      <button class="tab-button" data-tab="favourites">Favourites</button>
+    </div>
+
+    <!-- HISTORY SECTION -->
+    <div id="historySection">
+      <div class="list-header">
+        <h2>Saved Entries</h2>
+        <button class="btn-clear" id="clear-all">Clear All</button>
+      </div>
+      <div id="entries" class="entries"></div>
+      <div id="emptyMsg" class="empty" style="display:none;">No entries yet. Add one above 👆</div>
+    </div>
+
+    <!-- FAVOURITES SECTION -->
+    <div id="favSection" style="display:none;">
+      <div class="list-header">
+        <h2>Favourite Entries</h2>
+      </div>
+      <div id="favEntries" class="entries"></div>
+      <div id="favEmptyMsg" class="empty" style="display:none;">No favourite entries yet ⭐</div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "my_contact_notes_entries";
+
+    const form = document.getElementById("entry-form");
+    const phoneInput = document.getElementById("phone");
+    const locationInput = document.getElementById("location");
+    const dateInput = document.getElementById("date");
+    const personNumberInput = document.getElementById("personNumber");
+    const personNameInput = document.getElementById("personName");
+
+    const entriesDiv = document.getElementById("entries");
+    const favEntriesDiv = document.getElementById("favEntries");
+    const emptyMsg = document.getElementById("emptyMsg");
+    const favEmptyMsg = document.getElementById("favEmptyMsg");
+    const clearAllBtn = document.getElementById("clear-all");
+
+    // filters
+    const filterDate = document.getElementById("filterDate");
+    const filterPlace = document.getElementById("filterPlace");
+    const filterPerson = document.getElementById("filterPerson");
+    const filterNumber = document.getElementById("filterNumber");
+
+    const tabButtons = document.querySelectorAll(".tab-button");
+    const historySection = document.getElementById("historySection");
+    const favSection = document.getElementById("favSection");
+
+    // default date = today
+    (function setToday() {
+      const today = new Date().toISOString().split("T")[0];
+      dateInput.value = today;
+    })();
+
+    let activeTab = "history"; // history | favourites
+
+    function loadEntries() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return [];
+      try {
+        const arr = JSON.parse(raw);
+        return arr.map(e => ({
+          ...e,
+          favourite: !!e.favourite
+        }));
+      } catch (e) {
+        console.error("Failed to parse entries", e);
+        return [];
+      }
+    }
+
+    function saveEntries(entries) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    }
+
+    function matchesFilters(entry) {
+      // date filter (exact match)
+      if (filterDate.value) {
+        if ((entry.date || "").slice(0, 10) !== filterDate.value) return false;
+      }
+
+      // place filter
+      if (filterPlace.value.trim()) {
+        const q = filterPlace.value.trim().toLowerCase();
+        const loc = (entry.location || "").toLowerCase();
+        if (!loc.includes(q)) return false;
+      }
+
+      // person filter
+      if (filterPerson.value.trim()) {
+        const q = filterPerson.value.trim().toLowerCase();
+        const name = (entry.personName || "").toLowerCase();
+        if (!name.includes(q)) return false;
+      }
+
+      // number filter (phone or personNo, partial)
+      if (filterNumber.value.trim()) {
+        const q = filterNumber.value.trim().toLowerCase();
+        const phone = (entry.phone || "").toLowerCase();
+        const pNum = (entry.personNumber || "").toString().toLowerCase();
+        if (!phone.includes(q) && !pNum.includes(q)) return false;
+      }
+
+      return true;
+    }
+
+    function makeEntryElement(entryView) {
+      const div = document.createElement("div");
+      div.className = "entry";
+
+      const main = document.createElement("div");
+      main.className = "entry-main";
+
+      const left = document.createElement("div");
+      left.innerHTML = `
+        <strong>${entryView.phone}</strong><br>
+        ${entryView.location}
+        ${entryView.personName ? `<br>${entryView.personName}` : ""}
+      `;
+
+      const right = document.createElement("div");
+      right.textContent = ""; // date in meta
+
+      main.appendChild(left);
+      main.appendChild(right);
+
+      const meta = document.createElement("div");
+      meta.className = "entry-meta";
+      meta.innerHTML = `
+        <span>Date: ${entryView.date || "-"}</span>
+        <span>Person number: ${entryView.personNumber || "-"}</span>
+      `;
+
+      const actions = document.createElement("div");
+      actions.className = "entry-actions";
+
+      const favBtn = document.createElement("button");
+      favBtn.className = "btn-small btn-fav";
+      favBtn.textContent = entryView.favourite ? "★" : "☆";
+      favBtn.title = entryView.favourite ? "Remove from favourites" : "Add to favourites";
+      favBtn.addEventListener("click", () => {
+        const current = loadEntries();
+        const idx = current.findIndex(
+          (e) =>
+            e.phone === entryView.phone &&
+            e.location === entryView.location &&
+            e.date === entryView.date &&
+            (e.personName || "") === (entryView.personName || "") &&
+            String(e.personNumber || "") === String(entryView.personNumber || "")
+        );
+        if (idx > -1) {
+          current[idx].favourite = !current[idx].favourite;
+          saveEntries(current);
+          renderEntries();
+        }
+      });
+
+      const callBtn = document.createElement("button");
+      callBtn.className = "btn-small btn-call";
+      callBtn.textContent = "Call";
+      callBtn.addEventListener("click", () => {
+        window.location.href = `tel:${entryView.phone}`;
+      });
+
+      const delBtn = document.createElement("button");
+      delBtn.className = "btn-small btn-delete";
+      delBtn.textContent = "Delete";
+      delBtn.addEventListener("click", () => {
+        const current = loadEntries();
+        const idx = current.findIndex(
+          (e) =>
+            e.phone === entryView.phone &&
+            e.location === entryView.location &&
+            e.date === entryView.date &&
+            (e.personName || "") === (entryView.personName || "") &&
+            String(e.personNumber || "") === String(entryView.personNumber || "")
+        );
+        if (idx > -1) {
+          current.splice(idx, 1);
+          saveEntries(current);
+          renderEntries();
+        }
+      });
+
+      actions.appendChild(favBtn);
+      actions.appendChild(callBtn);
+      actions.appendChild(delBtn);
+
+      div.appendChild(main);
+      div.appendChild(meta);
+      div.appendChild(actions);
+
+      return div;
+    }
+
+    function renderEntries() {
+      const entries = loadEntries();
+
+      entriesDiv.innerHTML = "";
+      favEntriesDiv.innerHTML = "";
+
+      const filtered = entries
+        .slice()
+        .reverse()
+        .filter((entry) => matchesFilters(entry));
+
+      if (!filtered.length) {
+        emptyMsg.style.display = "block";
+        favEmptyMsg.style.display = "block";
+      } else {
+        emptyMsg.style.display = "none";
+      }
+
+      let favCount = 0;
+
+      filtered.forEach((entryView) => {
+        const node = makeEntryElement(entryView);
+        entriesDiv.appendChild(node);
+
+        if (entryView.favourite) {
+          const favNode = makeEntryElement(entryView);
+          favEntriesDiv.appendChild(favNode);
+          favCount++;
+        }
+      });
+
+      favEmptyMsg.style.display = favCount ? "none" : "block";
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const phone = phoneInput.value.trim();
+      const location = locationInput.value.trim();
+      const date = dateInput.value;
+      const personNumber = personNumberInput.value.trim();
+      const personName = personNameInput.value.trim();
+
+      if (!phone || !location || !date) {
+        alert("Phone, location and date are required.");
+        return;
+      }
+
+      const newEntry = {
+        phone,
+        location,
+        date,
+        personNumber: personNumber || null,
+        personName: personName || null,
+        favourite: false,
+        createdAt: new Date().toISOString()
+      };
+
+      const entries = loadEntries();
+      entries.push(newEntry);
+      saveEntries(entries);
+      renderEntries();
+
+      personNumberInput.value = "";
+      personNameInput.value = "";
+    });
+
+    clearAllBtn.addEventListener("click", () => {
+      if (confirm("Delete all saved entries?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        renderEntries();
+      }
+    });
+
+    // filters change -> re-render
+    [filterDate, filterPlace, filterPerson, filterNumber].forEach(input => {
+      input.addEventListener("input", renderEntries);
+      input.addEventListener("change", renderEntries);
+    });
+
+    // tabs
+    tabButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        tabButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        activeTab = btn.getAttribute("data-tab");
+
+        if (activeTab === "history") {
+          historySection.style.display = "block";
+          favSection.style.display = "none";
+        } else {
+          historySection.style.display = "none";
+          favSection.style.display = "block";
+        }
+      });
+    });
+
+    renderEntries();
+  </script>
+</body>
+</html>
